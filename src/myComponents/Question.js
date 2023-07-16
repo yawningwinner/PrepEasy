@@ -3,6 +3,9 @@ import React, { useState, useEffect } from "react";
 const Question = ({display}) => {
     const [items, setItems] = useState([]);
     const [answers, setAnswer] = useState([]);
+    const [timerActive, setTimerActive] = useState(true);
+    const [timeUp, setTimeUp] = useState(false);
+    // const [timeRemaining, setTimeRemaining] = useState(0);
 
     useEffect(() => {
         update();
@@ -59,10 +62,46 @@ const Question = ({display}) => {
             update();
         }
     };
+    const [timeRemaining, setTimeRemaining] = useState(0);
+
+  const startTimer = () => {
+    const inputSeconds = parseInt(document.getElementById("timerInput").value);
+    if (isNaN(inputSeconds) || inputSeconds <= 0) {
+      alert("Invalid input! Please enter a valid number of seconds.");
+      return;
+    }
+
+    setTimeRemaining(inputSeconds);
+
+    const intervalId = setInterval(() => {
+      setTimeRemaining((prevTime) => {
+        if (prevTime <= 0) {
+          clearInterval(intervalId);
+          setTimerActive(false);
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+    // setTimeout(() => {
+    //     clearInterval(intervalId);
+    //     alert("Time's up!");
+    //     setTimeUp(true);
+    //   }, inputSeconds * 1000);
+  };
+  const checkAnswer = (index) => {
+    if (timerActive) {
+      let newAnswer = [...answers];
+      if (items[index][5] === document.getElementById(`answer-${index}`).value) {
+        newAnswer[index] = "correct";
+      } else {
+        newAnswer[index] = "wrong";
+      }
+      setAnswer(newAnswer);
+    }
+  };
     const style={"display": display?"":"none"};
     return (
         <div>
-
             <div >
                 <div>Add question</div>
 
@@ -74,7 +113,12 @@ const Question = ({display}) => {
                         aria-describedby="emailHelp"
                     />
                 </div>
+                {/* <div>
+                <label htmlFor="title">Question Time</label>
+         **   <input type="number" id="timerInput" placeholder="Enter time in seconds" />
+             <button onClick={startTimer}>Start Timer</button>
 
+            </div> */}
                 <div >
                     <label htmlFor="description">Option 1</label>
                     <input
@@ -126,6 +170,8 @@ const Question = ({display}) => {
                                 <td scope="col">Option 3</td>
                                 <td scope="col">Option 4</td>
                                 <td scope="col">Answer</td>
+                                <td scope="col">Time</td>
+                                <td scope="col">Start Timer</td>
                                 <td scope="col">Check answer</td>
                                 <td scope="col">Result</td>
                                 <td scope="col">Actions</td>
@@ -142,25 +188,16 @@ const Question = ({display}) => {
                                     <td>{element[4]}</td>
                                     <td>
                                         <label>type answer here</label>
-                                        <input type="text" id={`answer-${index}`}></input>
+                                        <input type="text" id={`answer-${index}`} disabled={!timerActive}  />
                                     </td>
                                     <td>
-                                        <button
-                                            onClick={() => {
-                                                let newanswer=[...answers]
-                                                    console.log(document.getElementById(`answer-${index}`).value)
-                                                    if(element[5]===document.getElementById(`answer-${index}`).value)
-                                                    {
-                                                        newanswer[index]="correct"
-                                                        setAnswer(newanswer)
-                                                    }
-                                                    else
-                                                    {
-                                                        newanswer[index]="wrong"
-                                                        setAnswer(newanswer)
-                                                    }
-                                                }}
-                                        >
+                                    <input type="number" id="timerInput" placeholder="Enter time in seconds" />
+                                    </td>
+                                    <td>
+                                    <button onClick={startTimer} disabled={!timerActive}>Start Timer</button>
+                                    </td>
+                                    <td>
+                                    <button onClick={() => checkAnswer(index)} disabled={!timerActive}>
                                             check answer
                                         </button>                                            
                                     </td>
@@ -185,6 +222,7 @@ const Question = ({display}) => {
                 </div>
             </div>
         </div>
+        
     );
 };
 
